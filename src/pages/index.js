@@ -12,16 +12,7 @@ import {
   Divider,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-
-const theme = createTheme({
-  palette: {
-    primary: { main: "#337ab7", contrastText: "#ffffff" },
-    secondary: { main: "#343b40" },
-    background: { default: "#ffffff" },
-    text: { primary: "#212528" },
-    success: { main: "#388e3c" },
-  },
-});
+import personalizedTheme from "@/utils/theme";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -55,7 +46,7 @@ export default function LoginPage() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
+    <>
       <Head>
         <title>Iniciar Sesión</title>
         <meta name="description" content="Página de Login" />
@@ -67,7 +58,6 @@ export default function LoginPage() {
           alignItems: "center",
           justifyContent: "center",
           height: "100vh",
-          bgcolor: "background.default",
         }}
       >
         <Container maxWidth="sm">
@@ -77,7 +67,6 @@ export default function LoginPage() {
               p: { xs: 3, md: 5 },
               borderRadius: 2,
               textAlign: "center",
-              backgroundColor: "#ffffff",
             }}
           >
             {/* Opcional: Logo */}
@@ -133,6 +122,6 @@ export default function LoginPage() {
           </Paper>
         </Container>
       </Box>
-    </ThemeProvider>
+    </>
   );
 }
