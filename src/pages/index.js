@@ -11,14 +11,24 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import personalizedTheme from "@/utils/theme";
+import { useEffect } from "react";
+
 
 export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // verificamos si el usuario ya está logueado
+  useEffect(() => {
+    const loggedIn = localStorage.getItem("isLoggedIn");
+    if (loggedIn) {
+      setIsLoggedIn(true);
+      router.push("/docs");
+    }
+  }, [router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
