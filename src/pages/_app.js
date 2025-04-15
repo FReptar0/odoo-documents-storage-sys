@@ -1,29 +1,19 @@
-import Head from "next/head";
-import { ThemeProvider } from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
-import personalizedTheme from "@/utils/theme";
+import "@/styles/globals.css"; // Tus estilos globales
+import { useRouter } from "next/router";
 
+export default function App({ Component, pageProps }) {
+  const router = useRouter();
 
-function MyApp({ Component, pageProps }) {
+  // (Opcional) Función de logout global, por si luego pones un botón de "Cerrar sesión"
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    router.push("/login");
+  };
 
   return (
     <>
-      <Head>
-        <link rel="icon" href="/logos/logo.png" />
-        <link
-          href="/logos/logo.png"
-          rel="shortcut icon"
-          type="image/x-icon"
-        />
-        <title>Demo</title>
-      </Head>
-
-      <ThemeProvider theme={personalizedTheme}>
-        <CssBaseline />
-        <Component {...pageProps} />
-      </ThemeProvider>
+      {/* Aquí podrías poner un Header o Footer global si quieres */}
+      <Component {...pageProps} />
     </>
   );
 }
-
-export default MyApp;

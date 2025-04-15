@@ -1,149 +1,138 @@
-import React, { useState } from 'react';
+// pages/index.js
+import Head from "next/head";
+import { useState } from "react";
+import { useRouter } from "next/router";
 import {
   Container,
-  Typography,
-  Button,
   Box,
+  Typography,
+  TextField,
+  Button,
   Paper,
-  Snackbar,
-  Alert,
-} from '@mui/material';
+  Divider,
+} from "@mui/material";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
-export default function UploadPage() {
-  const [selectedFile, setSelectedFile] = useState(null);
-  // Estados para controlar el Snackbar
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+const theme = createTheme({
+  palette: {
+    primary: { main: "#337ab7", contrastText: "#ffffff" },
+    secondary: { main: "#343b40" },
+    background: { default: "#ffffff" },
+    text: { primary: "#212528" },
+    success: { main: "#388e3c" },
+  },
+});
 
-  // Manejo de la selección de archivo
-  const handleFileChange = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
-    }
-  };
+export default function LoginPage() {
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
-  // Función auxiliar para convertir el archivo a Base64
-  const fileToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (err) => reject(err);
-    });
-  };
-
-  // Manejo del envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedFile) {
-      showToast('Por favor, selecciona un archivo primero.', 'error');
-      return;
-    }
 
     try {
-      // Convertimos el archivo a Base64
-      const base64Data = await fileToBase64(selectedFile);
-      // Removemos el prefijo si existe (p.ej. "data:application/pdf;base64,")
-      const pureBase64 = base64Data.split(',')[1];
-
-      // Llamamos a nuestra API en /api/upload
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: selectedFile.name,
-          base64Data: pureBase64,
-        }),
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Error al subir el archivo');
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        // Guardamos "isLoggedIn" para indicar que el usuario está logueado
+        localStorage.setItem("isLoggedIn", "true");
+        // Redirigimos a la página principal (docs.js)
+        router.push("/docs");
+      } else {
+        setErrorMsg(data.message || "Credenciales inválidas");
       }
-
-      const result = await res.json();
-      showToast(`Documento creado correctamente. 
-        Attachment ID: ${result.attachmentId}, 
-        Document ID: ${result.documentId}`,
-        'success'
-      );
-
-      // Resetear el estado del archivo si quieres
-      setSelectedFile(null);
     } catch (error) {
-      showToast(`Error subiendo archivo: ${error.message}`, 'error');
+      setErrorMsg("Error de conexión");
     }
-  };
-
-  // Helper para mostrar el Snackbar
-  const showToast = (message, severity = 'success') => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
-  };
-
-  // Cerrar el Snackbar
-  const handleCloseSnackbar = () => {
-    setSnackbarOpen(false);
   };
 
   return (
-    <Container
-      maxWidth="sm"
-      sx={{
-        minHeight: '100vh',          // Ocupa altura completa
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-      {/* Papel que contiene el formulario */}
-      <Paper sx={{ p: 4, width: '100%', maxWidth: 500 }}>
-        <Typography variant="h5" gutterBottom textAlign="center">
-          Subir Archivo a Odoo (App Documentos)
-        </Typography>
+    <ThemeProvider theme={theme}>
+      <Head>
+        <title>Iniciar Sesión</title>
+        <meta name="description" content="Página de Login" />
+      </Head>
 
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-        >
-          {/* Botón para seleccionar archivo */}
-          <Button variant="outlined" component="label">
-            Seleccionar archivo
-            <input
-              type="file"
-              hidden
-              onChange={handleFileChange}
-            />
-          </Button>
-
-          {/* Mostrar el nombre del archivo seleccionado */}
-          {selectedFile && (
-            <Typography variant="subtitle1">
-              Archivo seleccionado: {selectedFile.name}
-            </Typography>
-          )}
-
-          {/* Botón para subir el archivo */}
-          <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-            Subir a Odoo
-          </Button>
-        </Box>
-      </Paper>
-
-      {/* Snackbar para mostrar mensajes tipo toast */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}  // tiempo en ms antes de cerrarse
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+          bgcolor: "background.default",
+        }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </Container>
+        <Container maxWidth="sm">
+          <Paper
+            elevation={3}
+            sx={{
+              p: { xs: 3, md: 5 },
+              borderRadius: 2,
+              textAlign: "center",
+              backgroundColor: "#ffffff",
+            }}
+          >
+            {/* Opcional: Logo */}
+            <Box sx={{ mb: 2 }}>
+              <img
+                src="/Tersoft.webp"
+                alt="Logo"
+                style={{ height: 100, objectFit: "contain" }}
+              />
+            </Box>
+
+            <Typography variant="h4" fontWeight="bold" gutterBottom>
+              Iniciar Sesión
+            </Typography>
+
+            <Divider sx={{ mb: 3 }} />
+
+            {errorMsg && (
+              <Typography variant="body1" color="error" sx={{ mb: 2 }}>
+                {errorMsg}
+              </Typography>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit}>
+              <TextField
+                label="Usuario"
+                variant="outlined"
+                fullWidth
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label="Contraseña"
+                type="password"
+                variant="outlined"
+                fullWidth
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+              >
+                ENTRAR
+              </Button>
+            </Box>
+          </Paper>
+        </Container>
+      </Box>
+    </ThemeProvider>
   );
 }
