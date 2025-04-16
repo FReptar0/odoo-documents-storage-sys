@@ -1,5 +1,5 @@
 // pages/docs.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import {
   AppBar,
@@ -17,6 +17,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 export default function DocsPage() {
   const router = useRouter();
+  const inputRef = useRef(null);
 
   // PROTECCIÓN DE RUTA: redirige al login si no está logueado
   useEffect(() => {
@@ -94,7 +95,7 @@ export default function DocsPage() {
         `Documento creado correctamente. Attachment ID: ${result.attachmentId}, Document ID: ${result.documentId}`,
         "success"
       );
-      // Reinicia selección de archivo
+      // Reinicia la selección de archivo
       setSelectedFile(null);
     } catch (error) {
       showToast(`Error subiendo archivo: ${error.message}`, "error");
@@ -180,10 +181,11 @@ export default function DocsPage() {
               onSubmit={handleSubmit}
               sx={{ display: "flex", flexDirection: "column", gap: 2 }}
             >
-              {/* Zona de arrastrar y soltar */}
+              {/* Zona de arrastrar y soltar con click que abre el explorador */}
               <Box
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
+                onClick={() => inputRef.current && inputRef.current.click()}
                 sx={{
                   border: "2px dashed #ccc",
                   borderRadius: 1,
@@ -200,9 +202,15 @@ export default function DocsPage() {
                   Arrastra y suelta tu archivo aquí
                   <br />o haz clic para seleccionar
                 </Typography>
-                {/* Input oculto para la selección vía clic */}
-                <input type="file" hidden onChange={handleFileChange} />
               </Box>
+
+              {/* Input oculto para la selección por clic */}
+              <input
+                type="file"
+                ref={inputRef}
+                hidden
+                onChange={handleFileChange}
+              />
 
               {/* Información del archivo seleccionado */}
               {selectedFile && (
