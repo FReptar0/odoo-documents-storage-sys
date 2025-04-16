@@ -12,14 +12,21 @@ import {
   Snackbar,
   Alert,
   LinearProgress,
+  IconButton,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import ImageIcon from "@mui/icons-material/Image";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import ArticleIcon from "@mui/icons-material/Article";
+import GridOnIcon from "@mui/icons-material/GridOn";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function DocsPage() {
   const router = useRouter();
   const inputRef = useRef(null);
 
-  // PROTECCIÓN DE RUTA: redirige al login si no está logueado
+  // Redirige al login si no está logueado
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
     if (!isLoggedIn) {
@@ -34,7 +41,7 @@ export default function DocsPage() {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [uploading, setUploading] = useState(false);
 
-  // Manejo de la selección del archivo vía input o drag & drop
+  // Manejador para la selección de archivo mediante input o drag & drop
   const handleFileChange = (event) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedFile(event.target.files[0]);
@@ -119,6 +126,45 @@ export default function DocsPage() {
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
+  };
+
+  // Función para determinar el ícono según el tipo y extensión del archivo
+  const getFileIcon = (file) => {
+    if (!file) return null;
+    const type = file.type;
+    const name = file.name.toLowerCase();
+
+    if (type === "application/pdf" || name.endsWith(".pdf")) {
+      return <PictureAsPdfIcon sx={{ fontSize: 40, color: "#555", mr: 1 }} />;
+    } else if (
+      type.startsWith("image/") ||
+      name.endsWith(".png") ||
+      name.endsWith(".jpg") ||
+      name.endsWith(".jpeg") ||
+      name.endsWith(".gif")
+    ) {
+      return <ImageIcon sx={{ fontSize: 40, color: "#555", mr: 1 }} />;
+    } else if (
+      type ===
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      type === "application/vnd.ms-excel" ||
+      name.endsWith(".xls") ||
+      name.endsWith(".xlsx")
+    ) {
+      return <GridOnIcon sx={{ fontSize: 40, color: "#555", mr: 1 }} />;
+    } else if (
+      type ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+      type === "application/msword" ||
+      name.endsWith(".doc") ||
+      name.endsWith(".docx")
+    ) {
+      return <ArticleIcon sx={{ fontSize: 40, color: "#555", mr: 1 }} />;
+    } else {
+      return (
+        <InsertDriveFileIcon sx={{ fontSize: 40, color: "#555", mr: 1 }} />
+      );
+    }
   };
 
   return (
@@ -212,11 +258,32 @@ export default function DocsPage() {
                 onChange={handleFileChange}
               />
 
-              {/* Información del archivo seleccionado */}
+              {/* Si hay un archivo seleccionado, mostramos el ícono, nombre y botón de eliminar */}
               {selectedFile && (
-                <Typography variant="subtitle1" sx={{ textAlign: "left" }}>
-                  Archivo seleccionado: {selectedFile.name}
-                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    border: "1px solid #ccc",
+                    borderRadius: 1,
+                    p: 1,
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    {getFileIcon(selectedFile)}
+                    <Typography variant="subtitle1">
+                      {selectedFile.name}
+                    </Typography>
+                  </Box>
+                  <IconButton
+                    onClick={() => setSelectedFile(null)}
+                    sx={{ color: "#f00" }}
+                    aria-label="Eliminar archivo"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
               )}
 
               <Button
